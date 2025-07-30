@@ -1,6 +1,7 @@
 
 *.py linguist-language=Python
-
+utils/* linguist-weight=10
+app.py linguist-weight=10
 *.html linguist-language=HTML
 *.js linguist-language=JavaScript
 *.css linguist-language=CSS
