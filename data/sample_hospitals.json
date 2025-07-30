@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "HOSP_0001",
+    "nom_etablissement": "Centre Hospitalier Universitaire Ibn Rochd",
+    "region": "Casablanca-Settat",
+    "delegation": "Casablanca",
+    "commune": "Casablanca",
+    "categorie": "CHU"
+  },
+  {
+    "_id": "HOSP_0002",
+    "nom_etablissement": "Hôpital Militaire Mohammed V",
+    "region": "Rabat-Salé-Kénitra",
+    "delegation": "Rabat",
+    "commune": "Rabat",
+    "categorie": "Hôpital Militaire"
+  },
+  {
+    "_id": "HOSP_0003",
+    "nom_etablissement": "Centre Hospitalier Regional Hassan II",
+    "region": "Fès-Meknès",
+    "delegation": "Fès",
+    "commune": "Fès",
+    "categorie": "CHR"
+  },
+  {
+    "_id": "HOSP_0004",
+    "nom_etablissement": "Hôpital Provincial Ouarzazate",
+    "region": "Drâa-Tafilalet",
+    "delegation": "Ouarzazate",
+    "commune": "Ouarzazate",
+    "categorie": "Hôpital Provincial"
+  },
+  {
+    "_id": "HOSP_0005",
+    "nom_etablissement": "Centre de Santé Urbain Agadir",
+    "region": "Souss-Massa",
+    "delegation": "Agadir Ida-Ou-Tanane",
+    "commune": "Agadir",
+    "categorie": "Centre de Santé"
+  }
+]

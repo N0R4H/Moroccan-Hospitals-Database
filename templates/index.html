@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 Moroccan Hospitals Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px auto;
+            max-width: 1400px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .search-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .hospital-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        .hospital-card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-custom {
+            border-radius: 25px;
+            padding: 8px 20px;
+            margin: 2px;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .badge-region {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+        }
+        .badge-category {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-hospital"></i> Moroccan Hospitals Management System</h1>
+                <p class="mb-0">NoSQL Database with TinyDB - CRUD Operations Interface</p>
+            </div>
+
+            <!-- Statistics Dashboard -->
+            <div class="container-fluid p-4">
+                <div class="row" id="statsContainer">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3 id="totalHospitals">{{ stats.total_hospitals }}</h3>
+                            <p><i class="fas fa-hospital-alt"></i> Total Hospitals</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3 id="totalRegions">{{ stats.regions|length }}</h3>
+                            <p><i class="fas fa-map-marked-alt"></i> Regions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3 id="totalDelegations">{{ stats.delegations|length }}</h3>
+                            <p><i class="fas fa-building"></i> Delegations</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3 id="totalCategories">{{ stats.categories|length }}</h3>
+                            <p><i class="fas fa-tags"></i> Categories</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <button class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#addHospitalModal">
+                            <i class="fas fa-plus"></i> Add Hospital
+                        </button>
+                        <button class="btn btn-info btn-custom" onclick="loadSampleData()">
+                            <i class="fas fa-database"></i> Load Sample Data
+                        </button>
+                        <button class="btn btn-warning btn-custom" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                            <i class="fas fa-upload"></i> Upload JSON File
+                        </button>
+                        <button class="btn btn-secondary btn-custom" onclick="exportData()">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                        <button class="btn btn-primary btn-custom" onclick="refreshData()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <h4><i class="fas fa-search"></i> Search & Filter Hospitals</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="searchRegion" class="form-label">Region</label>
+                            <input type="text" class="form-control" id="searchRegion" placeholder="Enter region">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchDelegation" class="form-label">Delegation</label>
+                            <input type="text" class="form-control" id="searchDelegation" placeholder="Enter delegation">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchCommune" class="form-label">Commune</label>
+                            <input type="text" class="form-control" id="searchCommune" placeholder="Enter commune">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchCategory" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="searchCategory" placeholder="Enter category">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-8">
+                            <label for="searchName" class="form-label">Hospital Name</label>
+                            <input type="text" class="form-control" id="searchName" placeholder="Enter hospital name">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary btn-custom me-2" onclick="searchHospitals()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button class="btn btn-outline-secondary btn-custom" onclick="clearSearch()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Hospitals Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Hospital Name</th>
+                                <th>Region</th>
+                                <th>Delegation</th>
+                                <th>Commune</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hospitalsTableBody">
+                            {% for hospital in hospitals %}
+                            <tr>
+                                <td><code>{{ hospital._id }}</code></td>
+                                <td><strong>{{ hospital.nom_etablissement }}</strong></td>
+                                <td><span class="badge badge-region">{{ hospital.region }}</span></td>
+                                <td>{{ hospital.delegation }}</td>
+                                <td>{{ hospital.commune }}</td>
+                                <td><span class="badge badge-category">{{ hospital.categorie }}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="editHospital('{{ hospital._id }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteHospital('{{ hospital._id }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Hospital Modal -->
+    <div class="modal fade" id="addHospitalModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Hospital</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addHospitalForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="addName" class="form-label">Hospital Name *</label>
+                                <input type="text" class="form-control" id="addName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="addRegion" class="form-label">Region *</label>
+                                <input type="text" class="form-control" id="addRegion" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="addDelegation" class="form-label">Delegation *</label>
+                                <input type="text" class="form-control" id="addDelegation" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="addCommune" class="form-label">Commune *</label>
+                                <input type="text" class="form-control" id="addCommune" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="addCategory" class="form-label">Category *</label>
+                                <input type="text" class="form-control" id="addCategory" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="saveNewHospital()">
+                        <i class="fas fa-save"></i> Save Hospital
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Hospital Modal -->
+    <div class="modal fade" id="editHospitalModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Hospital</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editHospitalForm">
+                        <input type="hidden" id="editHospitalId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="editName" class="form-label">Hospital Name *</label>
+                                <input type="text" class="form-control" id="editName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editRegion" class="form-label">Region *</label>
+                                <input type="text" class="form-control" id="editRegion" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="editDelegation" class="form-label">Delegation *</label>
+                                <input type="text" class="form-control" id="editDelegation" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editCommune" class="form-label">Commune *</label>
+                                <input type="text" class="form-control" id="editCommune" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="editCategory" class="form-label">Category *</label>
+                                <input type="text" class="form-control" id="editCategory" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateHospital()">
+                        <i class="fas fa-save"></i> Update Hospital
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-upload"></i> Upload JSON File</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="jsonFile" class="form-label">Select JSON File</label>
+                            <input type="file" class="form-control" id="jsonFile" name="file" accept=".json" required>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Upload a JSON file containing hospital data. The file should contain an array of hospital objects with the required fields.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="uploadFile()">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentHospitals = [];
+
+        // Show alert function
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show alert-custom`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Load sample data
+        async function loadSampleData() {
+            try {
+                const response = await fetch('/create_sample', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(data.message, 'success');
+                    refreshData();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error loading sample data: ' + error.message, 'danger');
+            }
+        }
+
+        // Upload file
+        async function uploadFile() {
+            const fileInput = document.getElementById('jsonFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('Please select a file', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/load_data', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('uploadModal')).hide();
+                    refreshData();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error uploading file: ' + error.message, 'danger');
+            }
+        }
+
+        // Export data
+        function exportData() {
+            window.open('/export_data', '_blank');
+            showAlert('Data export initiated', 'info');
+        }
+
+        // Search hospitals
+        async function searchHospitals() {
+            const params = new URLSearchParams({
+                region: document.getElementById('searchRegion').value,
+                delegation: document.getElementById('searchDelegation').value,
+                commune: document.getElementById('searchCommune').value,
+                categorie: document.getElementById('searchCategory').value,
+                nom_etablissement: document.getElementById('searchName').value
+            });
+
+            try {
+                const response = await fetch(`/api/search?${params}`);
+                const hospitals = await response.json();
+                displayHospitals(hospitals);
+                showAlert(`Found ${hospitals.length} hospitals`, 'info');
+            } catch (error) {
+                showAlert('Error searching hospitals: ' + error.message, 'danger');
+            }
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchRegion').value = '';
+            document.getElementById('searchDelegation').value = '';
+            document.getElementById('searchCommune').value = '';
+            document.getElementById('searchCategory').value = '';
+            document.getElementById('searchName').value = '';
+            refreshData();
+        }
+
+        // Save new hospital
+        async function saveNewHospital() {
+            const hospitalData = {
+                nom_etablissement: document.getElementById('addName').value,
+                region: document.getElementById('addRegion').value,
+                delegation: document.getElementById('addDelegation').value,
+                commune: document.getElementById('addCommune').value,
+                categorie: document.getElementById('addCategory').value
+            };
+
+            try {
+                const response = await fetch('/api/hospitals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(hospitalData)
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Hospital added successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('addHospitalModal')).hide();
+                    document.getElementById('addHospitalForm').reset();
+                    refreshData();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error adding hospital: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit hospital
+        async function editHospital(hospitalId) {
+            try {
+                const response = await fetch(`/api/hospitals/${hospitalId}`);
+                const hospital = await response.json();
+                
+                if (response.ok) {
+                    // If hospital is an array (search result), take the first one
+                    const hospitalData = Array.isArray(hospital) ? hospital[0] : hospital;
+                    
+                    document.getElementById('editHospitalId').value = hospitalData._id;
+                    document.getElementById('editName').value = hospitalData.nom_etablissement;
+                    document.getElementById('editRegion').value = hospitalData.region;
+                    document.getElementById('editDelegation').value = hospitalData.delegation;
+                    document.getElementById('editCommune').value = hospitalData.commune;
+                    document.getElementById('editCategory').value = hospitalData.categorie;
+                    
+                    new bootstrap.Modal(document.getElementById('editHospitalModal')).show();
+                } else {
+                    showAlert(hospital.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error loading hospital data: ' + error.message, 'danger');
+            }
+        }
+
+        // Update hospital
+        async function updateHospital() {
+            const hospitalId = document.getElementById('editHospitalId').value;
+            const hospitalData = {
+                nom_etablissement: document.getElementById('editName').value,
+                region: document.getElementById('editRegion').value,
+                delegation: document.getElementById('editDelegation').value,
+                commune: document.getElementById('editCommune').value,
+                categorie: document.getElementById('editCategory').value
+            };
+
+            try {
+                const response = await fetch(`/api/hospitals/${hospitalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(hospitalData)
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Hospital updated successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editHospitalModal')).hide();
+                    refreshData();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error updating hospital: ' + error.message, 'danger');
+            }
+        }
+
+        // Delete hospital
+        async function deleteHospital(hospitalId) {
+            if (confirm('Are you sure you want to delete this hospital?')) {
+                try {
+                    const response = await fetch(`/api/hospitals/${hospitalId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showAlert('Hospital deleted successfully!', 'success');
+                        refreshData();
+                    } else {
+                        showAlert(data.error, 'danger');
+                    }
+                } catch (error) {
+                    showAlert('Error deleting hospital: ' + error.message, 'danger');
+                }
+            }
+        }
+
+        // Display hospitals in table
+        function displayHospitals(hospitals) {
+            const tbody = document.getElementById('hospitalsTableBody');
+            tbody.innerHTML = '';
+            
+            hospitals.forEach(hospital => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><code>${hospital._id}</code></td>
+                    <td><strong>${hospital.nom_etablissement}</strong></td>
+                    <td><span class="badge badge-region">${hospital.region}</span></td>
+                    <td>${hospital.delegation}</td>
+                    <td>${hospital.commune}</td>
+                    <td><span class="badge badge-category">${hospital.categorie}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editHospital('${hospital._id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteHospital('${hospital._id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Refresh data
+        async function refreshData() {
+            try {
+                // Load hospitals
+                const hospitalsResponse = await fetch('/api/hospitals');
+                const hospitals = await hospitalsResponse.json();
+                displayHospitals(hospitals);
+                
+                // Load statistics
+                const statsResponse = await fetch('/api/statistics');
+                const stats = await statsResponse.json();
+                
+                document.getElementById('totalHospitals').textContent = stats.total_hospitals;
+                document.getElementById('totalRegions').textContent = Object.keys(stats.regions).length;
+                document.getElementById('totalDelegations').textContent = Object.keys(stats.delegations).length;
+                document.getElementById('totalCategories').textContent = Object.keys(stats.categories).length;
+                
+            } catch (error) {
+                showAlert('Error refreshing data: ' + error.message, 'danger');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add enter key support for search
+            document.querySelectorAll('#searchRegion, #searchDelegation, #searchCommune, #searchCategory, #searchName').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchHospitals();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
