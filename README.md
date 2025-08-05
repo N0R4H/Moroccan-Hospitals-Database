@@ -44,16 +44,19 @@
 
 ## 🏗️ Project Structure
 
-.
-├── app.py # Main Flask app
-├── data/ # JSON datasets
+moroccan-hospital-management/
+├── app.py # 🔁 Flask application entry point (Controller)
+├── data/ # 📁 JSON datasets
 │ └── sample_hospitals.json
-├── static/ # CSS & JS assets
+├── static/ # 🎨 CSS and JS assets
 │ ├── css/
+│ │ └── style.css
 │ └── js/
-├── templates/ # Jinja2 templates (HTML)
-├── requirements.txt # Python dependencies
-└── venv/ # Virtual environment
+│ └── app.js
+├── templates/ # 🖼️ HTML views with Jinja2
+│ └── index.html
+├── requirements.txt # 📦 Python dependencies
+└── venv/ # 🧪 Virtual environment (optional)
 
 ## 🚀 Getting Started
 
