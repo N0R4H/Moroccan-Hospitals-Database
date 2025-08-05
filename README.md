@@ -44,7 +44,7 @@
 ---
 
 ## 🏗️ Project Structure
-
+```sh
 moroccan-hospital-management/
 ├── app.py # 🔁 Flask application entry point (Controller)
 ├── data/ # 📁 JSON datasets
@@ -58,6 +58,7 @@ moroccan-hospital-management/
 │ └── index.html
 ├── requirements.txt # 📦 Python dependencies
 └── venv/ # 🧪 Virtual environment (optional)
+ ```
 
 ## 🚀 Getting Started
 
