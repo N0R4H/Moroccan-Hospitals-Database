@@ -13,8 +13,9 @@
 
 ## 📸 Live Demo
 
-🖥️ [Click here to view the demo](#)  
-📦 *Coming Soon...*
+[![Watch the Demo](https://img.youtube.com/vi/Y2ZsHw6ZcYM/hqdefault.jpg)](https://youtu.be/Y2ZsHw6ZcYM)
+
+▶️ Click the image above to watch the full demo on YouTube.
 
 ---
 
