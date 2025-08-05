@@ -61,17 +61,22 @@ moroccan-hospital-management/
 
 ## 🚀 Getting Started
 
-# 1. Clone the repo
+1. Clone the repo
+```sh
 git clone https://github.com/YOUR_USERNAME/moroccan-hospital-management.git
 cd moroccan-hospital-management
-
-# 2. Create and activate virtual env
+ ```
+2. Create and activate virtual env
+```sh
 python -m venv venv
 source venv/bin/activate   # or venv\Scripts\activate on Windows
-
-# 3. Install dependencies
+ ```
+3. Install dependencies
+```sh
 pip install -r requirements.txt
-
-# 4. Run the app
+ ```
+4. Run the app
+```sh
 python app.py
+ ```
 🧪 Then visit: http://localhost:5000
